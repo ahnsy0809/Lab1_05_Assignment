@@ -2,7 +2,7 @@
 #define MATRIX_SIZE 4
 using namespace std;
 
-void print(const double(&A)[MATRIX_SIZE][MATRIX_SIZE])
+void print(const double(&A)[MATRIX_SIZE][MATRIX_SIZE])		// print - 정사각행렬
 {
 	cout.setf(ios::fixed);
 	cout.setf(ios::showpoint);
@@ -15,58 +15,56 @@ void print(const double(&A)[MATRIX_SIZE][MATRIX_SIZE])
 	cout << endl;
 }
 
-void print(const double(&b)[MATRIX_SIZE])
+void print(const double(&b)[MATRIX_SIZE])					// print - 열벡터
 {
-	/**************
-	Implement the code here
-	**************/
+	cout.setf(ios::fixed);
+	cout.setf(ios::showpoint);
+	cout.precision(2);
+	for (int i = 0; i < MATRIX_SIZE; i++) cout << b[i] << endl;
 }
 
-void assign_row(double(&old_row)[MATRIX_SIZE], const double(&new_row)[MATRIX_SIZE]) {
+void assign_row(double(&old_row)[MATRIX_SIZE], const double(&new_row)[MATRIX_SIZE]) {		// old_row를 new_row로 바꾸는 함수
 	for (int i = 0; i < MATRIX_SIZE; i++)
 	{
 		old_row[i] = new_row[i];
 	}
 }
 
-void elementary_op1(double(&A)[MATRIX_SIZE][MATRIX_SIZE], int row1, int row2) {
+void elementary_op1(double(&A)[MATRIX_SIZE][MATRIX_SIZE], int row1, int row2) {				// 기본행연산 1 - A의 row1과 row2를 바꾸는 함수
 	double temp[MATRIX_SIZE];
 	assign_row(temp, A[row1]);
 	assign_row(A[row1], A[row2]);
 	assign_row(A[row2], temp);
 }
 
-void elementary_op1(double(&b)[MATRIX_SIZE], int row1, int row2) {
-	/**************
-	Implement the code here
-	**************/
+void elementary_op1(double(&b)[MATRIX_SIZE], int row1, int row2) {							// 기본행연산 1 - b[row1]과 b[row2]를 바꾸는 함수
+	double temp;
+	temp = b[row1];
+	b[row1] = b[row2];
+	b[row2] = temp;
 }
 
-void elementary_op2(double(&A)[MATRIX_SIZE][MATRIX_SIZE], int row, double a) {
+void elementary_op2(double(&A)[MATRIX_SIZE][MATRIX_SIZE], int row, double a) {				// 기본행연산 2 - A의 row를 a배하는 함수
 	double temp[MATRIX_SIZE];
 	for (int i = 0; i < MATRIX_SIZE; i++) temp[i] = a * A[row][i];
 	assign_row(A[row], temp);
 }
 
-void elementary_op2(double(&b)[MATRIX_SIZE], int row, double a) {
-	/**************
-	Implement the code here
-	**************/
+void elementary_op2(double(&b)[MATRIX_SIZE], int row, double a) {							// 기본행연산 2 - b[row]를 a배하는 함수
+	b[row] *= a;
 }
 
-void elementary_op3(double(&A)[MATRIX_SIZE][MATRIX_SIZE], int row1, int row2, double a) {
+void elementary_op3(double(&A)[MATRIX_SIZE][MATRIX_SIZE], int row1, int row2, double a) {	// 기본행연산 3 - A의 row1에 row2의 a배를 더하는 함수
 	double temp[MATRIX_SIZE];
 	for (int i = 0; i < MATRIX_SIZE; i++) temp[i] = A[row1][i] + a * A[row2][i];
 	assign_row(A[row1], temp);
 }
 
-void elementary_op3(double(&b)[MATRIX_SIZE], int row1, int row2, double a) {
-	/**************
-	Implement the code here
-	**************/
+void elementary_op3(double(&b)[MATRIX_SIZE], int row1, int row2, double a) {				// 기본행연산 3 - b[row1]에 b[row2]*a 더하는 함수 
+	b[row1] += a * b[row2];
 }
 
-int where_is_non_zero_row(const double(&A)[MATRIX_SIZE][MATRIX_SIZE], int col) {
+int where_is_non_zero_row(const double(&A)[MATRIX_SIZE][MATRIX_SIZE], int col) {			// 행사다리꼴로 정렬이 되었는가..?
 	for (int i = col; i < MATRIX_SIZE; i++) {
 		if (fabs(A[i][col]) > 0.001) {
 			return i;
@@ -75,7 +73,7 @@ int where_is_non_zero_row(const double(&A)[MATRIX_SIZE][MATRIX_SIZE], int col) {
 	return -1;
 }
 
-void rref(double(&A)[MATRIX_SIZE][MATRIX_SIZE], double(&B)[MATRIX_SIZE][MATRIX_SIZE]) {
+void rref(double(&A)[MATRIX_SIZE][MATRIX_SIZE], double(&B)[MATRIX_SIZE][MATRIX_SIZE]) {		// A인버스*B를 구하는 함수
 	int base_row;
 	double temp;
 	for (int i = 0; i < MATRIX_SIZE; i++)
@@ -104,7 +102,29 @@ void rref(double(&A)[MATRIX_SIZE][MATRIX_SIZE], double(&B)[MATRIX_SIZE][MATRIX_S
 }
 
 void rref(double(&A)[MATRIX_SIZE][MATRIX_SIZE], double(&b)[MATRIX_SIZE]) {
-	/**************
-	Implement the code here
-	**************/
+	int base_row;
+	double temp;
+	for (int i = 0; i < MATRIX_SIZE; i++)
+	{
+		base_row = where_is_non_zero_row(A, i);
+		if (base_row < 0) {
+			cout << "The input matrix is not invertible." << endl;
+			break;
+		}
+		else {
+			elementary_op1(A, base_row, i);
+			elementary_op1(b, base_row, i);
+			temp = 1.0 / A[i][i];
+			elementary_op2(A, i, temp);
+			elementary_op2(b, i, temp);
+			for (int j = 0; j < MATRIX_SIZE; j++)
+			{
+				if (i == j) continue;
+				temp = -A[j][i];
+				elementary_op3(A, j, i, temp);
+				elementary_op3(b, j, i, temp);
+			}
+		}
+	}
 }
+

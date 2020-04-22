@@ -20,8 +20,9 @@ int main() {
 
 	print(A);
 	print(b);
-	rref(A, b);
-	print(b);
+	rref(A, b);	// rref(A, b)는 b = A^-1 * b를 하는 함수인거야.
+	cout << endl;
+	print(b);	// b를 x로 바꿔버렸구나!
 	system("pause");
 
 	return 0;
